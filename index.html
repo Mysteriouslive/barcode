@@ -3,32 +3,40 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Generator</title>
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: white; }
-        canvas { max-width: 90%; height: auto; }
+        body { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
+        canvas { max-width: 90%; height: auto; border: 1px solid #eee; }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
+    <div id="msg" style="margin-top: 10px; color: gray;"></div>
     <script>
-        // 從網址列取得參數，例如 ?code=/ABC1234
-        const urlParams = new URLSearchParams(window.location.search);
-        const myCode = urlParams.get('code') || "NO CODE";
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const myCode = urlParams.get('code');
+            const msg = document.getElementById('msg');
 
-        try {
-            bwipjs.toCanvas('canvas', {
-                bcid: 'code128',       // 橫向條碼格式
-                text: myCode,          // 要生成的文字
-                scale: 5,              // 解析度放大，確保好掃
-                height: 15,            // 條碼高度比例
-                includetext: true,     // 顯示下方文字
-                textxalign: 'center',  // 文字居中
-            });
-        } catch (e) {
-            console.error(e);
-        }
+            if (!myCode) {
+                msg.innerText = "請在網址後方加上 ?code=/號碼";
+                return;
+            }
+
+            try {
+                bwipjs.toCanvas('canvas', {
+                    bcid: 'code128',
+                    text: myCode,
+                    scale: 5,
+                    height: 15,
+                    includetext: true,
+                    textxalign: 'center',
+                });
+                msg.innerText = "條碼已生成：" + myCode;
+            } catch (e) {
+                msg.innerText = "生成失敗：" + e;
+            }
+        };
     </script>
 </body>
 </html>
