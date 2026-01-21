@@ -3,39 +3,33 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Alison 載具條碼生成器</title>
+    <title>條碼生成器</title>
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
         body { 
             display: flex; 
-            flex-direction: column; /* 讓內容上下排列 */
+            flex-direction: column; /* 改為垂直排列以放置版權 */
             justify-content: center; 
             align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            background-color: white; 
-            overflow: hidden;
-            font-family: -apple-system, system-ui, sans-serif;
+            height: 100vh; margin: 0; background-color: white; overflow: hidden;
         }
-        canvas { 
-            max-width: 90%; 
-            height: auto; 
-            display: none; 
-        }
-        /* 版權宣告樣式 */
+        canvas { max-width: 90%; height: auto; display: none; }
+        .error { color: #8e8e93; font-family: sans-serif; font-size: 14px; text-align: center; }
+        
+        /* 僅新增版權樣式 */
         .copyright {
-            margin-top: 15px;
+            margin-top: 10px;
             font-size: 12px;
-            color: #c7c7cc; /* 淡灰色，不干擾掃描 */
-            letter-spacing: 1px;
+            color: #d1d1d6;
+            font-family: sans-serif;
+            display: none; /* 預設隱藏，與條碼同步顯示 */
         }
-        .error { color: #8e8e93; font-size: 14px; text-align: center; }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
     
-    <div id="copyTag" class="copyright" style="display:none;">© Alison</div>
+    <div id="auth" class="copyright">Alison</div>
     
     <div id="msg" class="error">正在生成條碼...</div>
 
@@ -47,22 +41,21 @@
                 
                 if (raw) {
                     let code = decodeURIComponent(raw);
-                    // 強力清洗字串
                     code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
 
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code128',
                         text: code,
-                        scale: 8,
-                        height: 18,
+                        scale: 8,       
+                        height: 18,      
                         includetext: false
                     });
                     
                     document.getElementById('barcode').style.display = 'block';
-                    document.getElementById('copyTag').style.display = 'block'; // 顯示版權
+                    document.getElementById('auth').style.display = 'block'; // 顯示版權
                     document.getElementById('msg').style.display = 'none';
                 } else {
-                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼";
+                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址是否有 ?code=)";
                 }
             } catch (e) {
                 document.getElementById('msg').innerText = "發生錯誤：" + e;
