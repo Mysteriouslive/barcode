@@ -2,38 +2,46 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
-        body {     display: flex; justify-content: center;  align-items: center;  height: 100vh;  margin: 0;  background: white; { max-width: 90%; height: auto; border: 1px solid #eee; }
+        /* 設定滿版且居中的樣式 */
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background-color: white; 
+            overflow: hidden;
+        }
+        /* 確保畫布寬度適合螢幕 */
+        canvas { 
+            max-width: 95%; 
+            height: auto; 
+        }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    <div id="msg" style="margin-top: 10px; color: gray;"></div>
+    <canvas id="barcodeCanvas"></canvas>
     <script>
         window.onload = function() {
+            // 從網址列抓取 code 參數
             const urlParams = new URLSearchParams(window.location.search);
             const myCode = urlParams.get('code');
-            const msg = document.getElementById('msg');
 
-            if (!myCode) {
-                msg.innerText = "請在網址後方加上 ?code=/號碼";
-                return;
-            }
-
-            try {
-                bwipjs.toCanvas('canvas', {
-                    bcid: 'code128',
-                    text: myCode,
-                    scale: 5,
-                    height: 15,
-                    includetext: true,
-                    textxalign: 'center',
-                });
-                msg.innerText = "條碼已生成：" + myCode;
-            } catch (e) {
-                msg.innerText = "生成失敗：" + e;
+            if (myCode) {
+                try {
+                    bwipjs.toCanvas('barcodeCanvas', {
+                        bcid: 'code128',       // 台灣載具專用橫向格式
+                        text: myCode,          // 載具號碼
+                        scale: 5,              // 解析度放大
+                        height: 12,            // 條碼高度
+                        includetext: false,    // 關鍵：設為 false 即可刪除條碼下的文字
+                    });
+                } catch (e) {
+                    console.error("條碼生成失敗:", e);
+                }
             }
         };
     </script>
