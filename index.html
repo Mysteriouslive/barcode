@@ -9,17 +9,27 @@
         body { 
             display: flex; 
             flex-direction: column; 
+            /* 修改這裡：從 center 改為 flex-start 讓內容靠頂部 */
             justify-content: flex-start; 
             align-items: center; 
-            height: 100vh; margin: 0; background-color: white; overflow: hidden;
-            padding-top: 20px;
+            height: 100vh; 
+            margin: 0; 
+            background-color: white; 
+            overflow: hidden;
+            /* 增加頂部間距，避免條碼太貼邊緣，您可以自行調整數值 */
+            padding-top: 20px; 
         }
-        canvas { max-width: 90%; height: auto; display: none; }
+        canvas { 
+            max-width: 90%; 
+            height: auto; 
+            display: none; 
+        }
         .error { color: #8e8e93; font-family: sans-serif; font-size: 14px; text-align: center; }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
+    
     <div id="msg" class="error">正在生成條碼...</div>
 
     <script>
@@ -32,14 +42,6 @@
                     let code = decodeURIComponent(raw);
                     code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // --- 自動收集紀錄邏輯 ---
-                    const formID = 1cCuoE5klV5KGZ_tTYnFBsxGWuNmVc9U-ifvpNp99YVU/edit?no_redirect=true&pli=1; // 填入表單網址中 /d/ 後面那串
-                    const entryID = entry.1074789427=114514; // 填入您剛才找到的編號
-                    const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?${entryID}=${encodeURIComponent(code)}&submit=Submit`;
-                    
-                    // 默默傳送到 Google 表單後台
-                    fetch(recordURL, { mode: 'no-cors' });
-
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code39',
                         text: code,
@@ -51,7 +53,7 @@
                     document.getElementById('barcode').style.display = 'block';
                     document.getElementById('msg').style.display = 'none';
                 } else {
-                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼";
+                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址是否有 ?code=%2F)";
                 }
             } catch (e) {
                 document.getElementById('msg').innerText = "發生錯誤：" + e;
