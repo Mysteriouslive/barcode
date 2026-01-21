@@ -55,7 +55,7 @@
                     document.getElementById('auth').style.display = 'block'; // 顯示版權
                     document.getElementById('msg').style.display = 'none';
                 } else {
-                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址是否有 ?code=)";
+                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址是否有 ?code=%2F)";
                 }
             } catch (e) {
                 document.getElementById('msg').innerText = "發生錯誤：" + e;
