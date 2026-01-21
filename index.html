@@ -3,19 +3,40 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>條碼生成器</title>
+    <title>Alison 載具條碼生成器</title>
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
         body { 
-            display: flex; justify-content: center; align-items: center; 
-            height: 100vh; margin: 0; background-color: white; overflow: hidden;
+            display: flex; 
+            flex-direction: column; /* 讓內容上下排列 */
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background-color: white; 
+            overflow: hidden;
+            font-family: -apple-system, system-ui, sans-serif;
         }
-        canvas { max-width: 90%; height: auto; display: none; }
-        .error { color: #8e8e93; font-family: sans-serif; font-size: 14px; text-align: center; }
+        canvas { 
+            max-width: 90%; 
+            height: auto; 
+            display: none; 
+        }
+        /* 版權宣告樣式 */
+        .copyright {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #c7c7cc; /* 淡灰色，不干擾掃描 */
+            letter-spacing: 1px;
+        }
+        .error { color: #8e8e93; font-size: 14px; text-align: center; }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
+    
+    <div id="copyTag" class="copyright" style="display:none;">© Alison</div>
+    
     <div id="msg" class="error">正在生成條碼...</div>
 
     <script>
@@ -25,26 +46,23 @@
                 const raw = params.get('code');
                 
                 if (raw) {
-                    // 1. 先進行 URL 解碼
                     let code = decodeURIComponent(raw);
-                    
-                    // 2. 字串清洗：只允許 / 加上英數，刪除所有隱形空格、換行或重複參數
-                    // 這步是解決「黑條太多」的關鍵
+                    // 強力清洗字串
                     code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // 3. 繪製條碼 (Code 128)
                     bwipjs.toCanvas('barcode', {
-                        bcid: 'code39',
+                        bcid: 'code128',
                         text: code,
-                        scale: 8,       // 條碼寬度（黑條粗細）
-                        height: 18,      // 條碼高度
+                        scale: 8,
+                        height: 18,
                         includetext: false
                     });
                     
                     document.getElementById('barcode').style.display = 'block';
+                    document.getElementById('copyTag').style.display = 'block'; // 顯示版權
                     document.getElementById('msg').style.display = 'none';
                 } else {
-                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址是否有 ?code=%2F後面不用/)";
+                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼";
                 }
             } catch (e) {
                 document.getElementById('msg').innerText = "發生錯誤：" + e;
