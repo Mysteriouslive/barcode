@@ -1,40 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>條碼生成器</title>
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
-        body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: white; overflow: hidden; }
+        body { 
+            display: flex; justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; background-color: white; overflow: hidden;
+        }
         canvas { max-width: 90%; height: auto; display: none; }
-        .error { color: #8e8e93; font-family: sans-serif; font-size: 14px; }
+        .error { color: #8e8e93; font-family: sans-serif; font-size: 14px; text-align: center; }
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    <div id="msg" class="error">正在產生正確條碼...</div>
+    <canvas id="barcode"></canvas>
+    <div id="msg" class="error">正在生成條碼...</div>
+
     <script>
         window.onload = function() {
-            const params = new URLSearchParams(window.location.search);
-            const raw = params.get('code');
-            if (raw) {
-                try {
-                    // 重點：解碼網址參數，確保 / 符號正確
-                    const myCode = decodeURIComponent(raw);
-                    bwipjs.toCanvas('canvas', {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const raw = params.get('code');
+                
+                if (raw) {
+                    // 1. 先進行 URL 解碼
+                    let code = decodeURIComponent(raw);
+                    
+                    // 2. 字串清洗：只允許 / 加上英數，刪除所有隱形空格、換行或重複參數
+                    // 這步是解決「黑條太多」的關鍵
+                    code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
+
+                    // 3. 繪製條碼 (Code 128)
+                    bwipjs.toCanvas('barcode', {
                         bcid: 'code128',
-                        text: myCode,
-                        scale: 8,       // 提高解析度
-                        height: 15,      // 調整高度
-                        includetext: false 
+                        text: code,
+                        scale: 8,       // 條碼寬度（黑條粗細）
+                        height: 18,      // 條碼高度
+                        includetext: false
                     });
-                    document.getElementById('canvas').style.display = 'block';
+                    
+                    document.getElementById('barcode').style.display = 'block';
                     document.getElementById('msg').style.display = 'none';
-                } catch (e) {
-                    document.getElementById('msg').innerText = "條碼生成失敗";
+                } else {
+                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址是否有 ?code=)";
                 }
-            } else {
-                document.getElementById('msg').innerText = "⚠️ 尚未偵測到載具號碼";
+            } catch (e) {
+                document.getElementById('msg').innerText = "發生錯誤：" + e;
             }
         };
     </script>
