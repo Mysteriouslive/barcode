@@ -5,43 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
-        /* 設定滿版且居中的樣式 */
         body { 
             display: flex; 
+            flex-direction: column;
             justify-content: center; 
             align-items: center; 
             height: 100vh; 
             margin: 0; 
             background-color: white; 
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
-        /* 確保畫布寬度適合螢幕 */
         canvas { 
-            max-width: 95%; 
+            max-width: 90%; 
             height: auto; 
+        }
+        .error-msg {
+            color: #ff3b30;
+            font-weight: 600;
+            padding: 20px;
+            text-align: center;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
     <canvas id="barcodeCanvas"></canvas>
+    <div id="tip" class="error-msg"></div>
+
     <script>
         window.onload = function() {
-            // 從網址列抓取 code 參數
             const urlParams = new URLSearchParams(window.location.search);
             const myCode = urlParams.get('code');
+            const tipElement = document.getElementById('tip');
 
-            if (myCode) {
+            // 判斷：如果有輸入 code 參數
+            if (myCode && myCode.trim() !== "") {
                 try {
                     bwipjs.toCanvas('barcodeCanvas', {
-                        bcid: 'code128',       // 台灣載具專用橫向格式
-                        text: myCode,          // 載具號碼
-                        scale: 5,              // 解析度放大
-                        height: 12,            // 條碼高度
-                        includetext: false,    // 關鍵：設為 false 即可刪除條碼下的文字
+                        bcid: 'code128',
+                        text: myCode,
+                        scale: 5,
+                        height: 12,
+                        includetext: false,
                     });
+                    tipElement.style.display = 'none'; // 隱藏提示
                 } catch (e) {
-                    console.error("條碼生成失敗:", e);
+                    tipElement.innerText = "條碼生成失敗，請檢查號碼格式";
                 }
+            } 
+            // 判斷：如果沒有輸入 code 參數
+            else {
+                tipElement.innerHTML = "⚠️ 尚未偵測到載具號碼<br><small>請確認捷徑網址後方有加上 ?code=你的號碼</small>";
+                document.getElementById('barcodeCanvas').style.display = 'none'; // 隱藏空白畫布
             }
         };
     </script>
