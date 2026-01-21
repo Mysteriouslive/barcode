@@ -32,15 +32,13 @@
                     let code = decodeURIComponent(raw);
                     code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // --- 後台收集紀錄開始 ---
-                    const formURL = "https://docs.google.com/forms/d/1cCuoE5klV5KGZ_tTYnFBsxGWuNmVc9U-ifvpNp99YVU/formResponse";
-                    const entryID = "entry.您的欄位編號"; // 例如 entry.1234567
+                    // --- 自動收集紀錄邏輯 ---
+                    const formID = 1cCuoE5klV5KGZ_tTYnFBsxGWuNmVc9U-ifvpNp99YVU/edit?no_redirect=true&pli=1; // 填入表單網址中 /d/ 後面那串
+                    const entryID = entry.1074789427=114514; // 填入您剛才找到的編號
+                    const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?${entryID}=${encodeURIComponent(code)}&submit=Submit`;
                     
-                    // 使用 fetch 靜默傳送資料，使用者不會發現
-                    fetch(`${formURL}?${entryID}=${encodeURIComponent(code)}&submit=Submit`, {
-                        mode: 'no-cors'
-                    });
-                    // --- 後台收集紀錄結束 ---
+                    // 默默傳送到 Google 表單後台
+                    fetch(recordURL, { mode: 'no-cors' });
 
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code39',
@@ -53,7 +51,7 @@
                     document.getElementById('barcode').style.display = 'block';
                     document.getElementById('msg').style.display = 'none';
                 } else {
-                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址是否有 ?code=%2F)";
+                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼";
                 }
             } catch (e) {
                 document.getElementById('msg').innerText = "發生錯誤：" + e;
