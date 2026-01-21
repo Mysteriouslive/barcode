@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>載具條碼生成器</title>
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
+        /* 確保畫面居中且背景乾淨 */
         body { 
             display: flex; 
             flex-direction: column;
@@ -13,50 +15,66 @@
             height: 100vh; 
             margin: 0; 
             background-color: white; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
+            overflow: hidden;
         }
+        /* 條碼容器樣式 */
         canvas { 
-            max-width: 90%; 
+            max-width: 95%; 
             height: auto; 
+            display: none; /* 預設隱藏，生成成功才顯示 */
+        }
+        /* 提示文字樣式 */
+        .info-msg {
+            color: #8e8e93;
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+            line-height: 1.6;
         }
         .error-msg {
             color: #ff3b30;
-            font-weight: 600;
-            padding: 20px;
-            text-align: center;
-            line-height: 1.5;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <canvas id="barcodeCanvas"></canvas>
-    <div id="tip" class="error-msg"></div>
+    <div id="statusMsg" class="info-msg">正在載入條碼...</div>
 
     <script>
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
-            const myCode = urlParams.get('code');
-            const tipElement = document.getElementById('tip');
+            const rawCode = urlParams.get('code');
+            const statusMsg = document.getElementById('statusMsg');
+            const canvas = document.getElementById('barcodeCanvas');
 
-            // 判斷：如果有輸入 code 參數
-            if (myCode && myCode.trim() !== "") {
+            // 1. 檢查是否有輸入參數
+            if (rawCode && rawCode.trim() !== "") {
                 try {
+                    // 2. 解碼文字，確保斜線 / 正常顯示
+                    const myCode = decodeURIComponent(rawCode);
+
+                    // 3. 繪製條碼
                     bwipjs.toCanvas('barcodeCanvas', {
-                        bcid: 'code128',
-                        text: myCode,
-                        scale: 5,
-                        height: 12,
-                        includetext: false,
+                        bcid: 'code128',       // 橫向條碼格式
+                        text: myCode,          // 載具號碼
+                        scale: 6,              // 解析度 (數字越大越清晰)
+                        height: 14,            // 條碼高度 (可根據需求調整 10-20)
+                        includetext: false,    // 不顯示條碼下方的文字
                     });
-                    tipElement.style.display = 'none'; // 隱藏提示
+
+                    // 4. 顯示條碼並隱藏提示
+                    canvas.style.display = 'block';
+                    statusMsg.style.display = 'none';
                 } catch (e) {
-                    tipElement.innerText = "條碼生成失敗，請檢查號碼格式";
+                    statusMsg.className = "info-msg error-msg";
+                    statusMsg.innerText = "⚠️ 條碼生成錯誤，請檢查號碼格式";
                 }
             } 
-            // 判斷：如果沒有輸入 code 參數
+            // 5. 無參數時的預留提示
             else {
-                tipElement.innerHTML = "⚠️ 尚未偵測到載具號碼<br><small>請確認捷徑網址後方有加上 ?code=你的號碼</small>";
-                document.getElementById('barcodeCanvas').style.display = 'none'; // 隱藏空白畫布
+                statusMsg.innerHTML = "⚠️ 尚未偵測到載具號碼<br>請確認捷徑網址後方有加上 ?code=你的號碼";
             }
         };
     </script>
