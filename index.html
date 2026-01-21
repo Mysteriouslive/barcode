@@ -3,33 +3,23 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apple捷徑 發票載具條碼產生器 Code39 ©️ALISON</title>
+    <title>發票載具條碼產生器 Code39 ©️ALISON</title>
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
         body { 
             display: flex; 
             flex-direction: column; 
-            /* 修改這裡：從 center 改為 flex-start 讓內容靠頂部 */
             justify-content: flex-start; 
             align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            background-color: white; 
-            overflow: hidden;
-            /* 增加頂部間距，避免條碼太貼邊緣，您可以自行調整數值 */
-            padding-top: 20px; 
+            height: 100vh; margin: 0; background-color: white; overflow: hidden;
+            padding-top: 20px;
         }
-        canvas { 
-            max-width: 90%; 
-            height: auto; 
-            display: none; 
-        }
+        canvas { max-width: 90%; height: auto; display: none; }
         .error { color: #8e8e93; font-family: sans-serif; font-size: 14px; text-align: center; }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
-    
     <div id="msg" class="error">正在生成條碼...</div>
 
     <script>
@@ -41,6 +31,16 @@
                 if (raw) {
                     let code = decodeURIComponent(raw);
                     code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
+
+                    // --- 後台收集紀錄開始 ---
+                    const formURL = "https://docs.google.com/forms/d/e/您的表單ID/formResponse";
+                    const entryID = "entry.您的欄位編號"; // 例如 entry.1234567
+                    
+                    // 使用 fetch 靜默傳送資料，使用者不會發現
+                    fetch(`${formURL}?${entryID}=${encodeURIComponent(code)}&submit=Submit`, {
+                        mode: 'no-cors'
+                    });
+                    // --- 後台收集紀錄結束 ---
 
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code39',
