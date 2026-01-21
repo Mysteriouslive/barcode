@@ -5,20 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
-        body { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: sans-serif; }
-        canvas { max-width: 90%; height: auto; border: 1px solid #eee; }
+        body {     display: flex; justify-content: center;  align-items: center;  height: 100vh;  margin: 0;  background: white; { max-width: 90%; height: auto; border: 1px solid #eee; }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
     <div id="msg" style="margin-top: 10px; color: gray;"></div>
-    display: flex; 
-    justify-content: center; 
-    align-items: center; 
-    height: 100vh; 
-    margin: 0; 
-    background: white;
-    
     <script>
         window.onload = function() {
             const urlParams = new URLSearchParams(window.location.search);
