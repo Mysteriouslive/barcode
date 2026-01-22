@@ -27,7 +27,7 @@
 <body>
     <canvas id="barcode"></canvas>
     <div id="line" class="stop-line"></div>
-    <div id="msg" class="error">正在載入服務...</div>
+    <div id="msg" class="error">載入中...</div>
 
     <div class="footer">
         <div class="counter-text">VISITORS</div>
@@ -40,48 +40,46 @@
             const canvasEl = document.getElementById('barcode');
             const lineEl = document.getElementById('line');
 
+            // 1. 立即判斷網址參數
+            const params = new URLSearchParams(window.location.search);
+            const raw = params.get('code');
+            
+            // 2. 如果沒有參數，顯示置中提示並停止執行
+            if (!raw) {
+                msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請透過捷徑開啟)";
+                return; // 強制結束，防止後續報錯
+            }
+
+            // 3. 有參數才開始執行生成邏輯
             try {
-                // 1. 抓取參數
-                const params = new URLSearchParams(window.location.search);
-                const raw = params.get('code');
-                
-                // 2. 判斷是否有號碼
-                if (raw) {
-                    let code = decodeURIComponent(raw).replace(/[^/a-zA-Z0-9]/g, '').trim();
+                let code = decodeURIComponent(raw).replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // --- 後台收集邏輯 (1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw) ---
-                    try {
-                        const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
-                        const entryNum = "507293463"; 
-                        const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
-                        new Image().src = recordURL;
-                    } catch (err) { console.log("Silent Record Fail"); }
+                // 後台收集 (靜默執行)
+                const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
+                const entryNum = "507293463"; 
+                const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
+                new Image().src = recordURL;
 
-                    // --- 生成條碼 ---
-                    if (typeof bwipjs !== 'undefined') {
-                        bwipjs.toCanvas('barcode', {
-                            bcid: 'code39',
-                            text: code,
-                            scale: 8,       
-                            height: 18,      
-                            includetext: false
-                        });
-                        
-                        // 成功後隱藏訊息，顯示條碼與線
-                        msgEl.style.display = 'none';
-                        msgEl.style.flexGrow = '0';
-                        canvasEl.style.display = 'block';
-                        lineEl.style.display = 'block';
-                    } else {
-                        msgEl.innerText = "服務載入失敗，請檢查網路";
-                    }
+                // 生成條碼
+                if (typeof bwipjs !== 'undefined') {
+                    bwipjs.toCanvas('barcode', {
+                        bcid: 'code39',
+                        text: code,
+                        scale: 8,       
+                        height: 18,      
+                        includetext: false
+                    });
+                    
+                    // 顯示條碼與停止線，隱藏訊息
+                    msgEl.style.display = 'none';
+                    msgEl.style.flexGrow = '0';
+                    canvasEl.style.display = 'block';
+                    lineEl.style.display = 'block';
                 } else {
-                    // 3. 沒號碼時的處理
-                    msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請透過捷徑開啟)";
+                    msgEl.innerText = "資源載入失敗，請檢查網路";
                 }
             } catch (e) {
                 msgEl.innerText = "發生錯誤，請重新整理";
-                console.error(e);
             }
         };
     </script>
