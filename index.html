@@ -11,20 +11,18 @@
             align-items: center; min-height: 100vh; margin: 0; 
             background-color: white; padding-top: 20px;
         }
-        canvas { max-width: 90%; height: auto; display: none; margin-bottom: 30px; }
+        canvas { max-width: 90%; height: auto; display: none; margin-bottom: 20px; }
         .error { color: #8e8e93; font-family: sans-serif; font-size: 14px; text-align: center; }
-        
-        /* 紀錄顯示區樣式 */
-        .record-box { width: 100%; max-width: 500px; border-top: 1px solid #eee; padding-top: 20px; display: none; }
-        iframe { width: 100%; height: 300px; border: none; }
+        .record-box { width: 100%; max-width: 500px; border-top: 1px solid #eee; margin-top: 10px; padding: 10px; }
+        iframe { width: 100%; height: 400px; border: none; border-radius: 8px; }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
     <div id="msg" class="error">正在生成條碼...</div>
 
-    <div id="recordArea" class="record-box">
-        <p style="font-size: 12px; color: #ccc; text-align: center;">最近收集紀錄 (由 Google 提供)</p>
+    <div id="recordArea" class="record-box" style="display: none;">
+        <p style="font-size: 12px; color: #ccc; text-align: center;">最新收集紀錄</p>
         <iframe src="https://docs.google.com/forms/d/e/1cCuoE5klV5KGZ_tTYnFBsxGWuNmVc9U-ifvpNp99YVU/viewanalytics"></iframe>
     </div>
 
@@ -39,23 +37,23 @@
 
                     // --- 後台收集邏輯 ---
                     const formID = "1cCuoE5klV5KGZ_tTYnFBsxGWuNmVc9U-ifvpNp99YVU";
-                    const entryNum = "507293463"; 
+                    const entryNum = "這裡填入您剛才找到的數字"; 
                     
-                    if (entryNum !== "507293463") {
+                    if (entryNum !== "這裡填入您剛才找到的數字") {
                         const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
                         new Image().src = recordURL;
                     }
 
+                    // --- 生成條碼 ---
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code39', text: code, scale: 8, height: 18, includetext: false
                     });
                     
                     document.getElementById('barcode').style.display = 'block';
                     document.getElementById('msg').style.display = 'none';
-                    // 顯示紀錄區
                     document.getElementById('recordArea').style.display = 'block';
                 } else {
-                    document.getElementById('msg').innerText = "⚠️ 尚未輸入號碼";
+                    document.getElementById('msg').innerText = "⚠️ 尚未輸入載具號碼";
                 }
             } catch (e) { }
         };
