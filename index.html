@@ -9,7 +9,7 @@
         body { 
             display: flex; 
             flex-direction: column; 
-            justify-content: flex-start; /* 保持條碼在畫面頂部 */
+            justify-content: flex-start; 
             align-items: center; 
             height: 100vh; 
             margin: 0; 
@@ -22,7 +22,7 @@
             height: auto; 
             display: none; 
         }
-        /* 讓錯誤提示訊息在沒號碼時完全置中 */
+        /* 讓提示訊息在沒號碼時垂直水平置中 */
         .error { 
             color: #8e8e93; 
             font-family: sans-serif; 
@@ -35,46 +35,39 @@
             width: 100%;
             white-space: pre-wrap;
         }
-        .record-box { width: 100%; max-width: 500px; border-top: 1px solid #eee; margin-top: 10px; padding: 10px; }
-        iframe { width: 100%; height: 400px; border: none; border-radius: 8px; }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
+    
     <div id="msg" class="error">正在生成條碼...</div>
-
-    <div id="recordArea" class="record-box" style="display: none;">
-        <p style="font-size: 12px; color: #ccc; text-align: center;">最新收集紀錄 (由 Google 提供)</p>
-        <iframe src="https://docs.google.com/forms/d/e/1cCuoE5klV5KGZ_tTYnFBsxGWuNmVc9U-ifvpNp99YVU/viewanalytics"></iframe>
-    </div>
 
     <script>
         window.onload = function() {
             const msgEl = document.getElementById('msg');
             const canvasEl = document.getElementById('barcode');
-            const recordArea = document.getElementById('recordArea');
 
             try {
                 const params = new URLSearchParams(window.location.search);
                 const raw = params.get('code');
                 
                 if (raw) {
-                    // 有號碼時：關閉置中佈局，讓條碼靠上顯示
+                    // 有號碼時：取消置中佈局，讓條碼靠頂部顯示
                     msgEl.style.display = 'none';
                     msgEl.style.flexGrow = '0';
                     
                     let code = decodeURIComponent(raw);
                     code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // --- 後台收集邏輯 (使用您提供的 507293463) ---
+                    // --- 後台收集邏輯 (靜默傳送，不顯示在網頁上) ---
                     const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
-                    const entryNum = "507293463"; 
+                    const entryNum = "507293463"; // 這是您剛才確定的編號
                     const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
                     
-                    // 發送紀錄
+                    // 背景發送紀錄
                     new Image().src = recordURL;
 
-                    // --- 生成條碼 ---
+                    // --- 生成條碼 (完全保留原本設定) ---
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code39',
                         text: code,
@@ -84,9 +77,8 @@
                     });
                     
                     canvasEl.style.display = 'block';
-                    recordArea.style.display = 'block';
                 } else {
-                    // 沒號碼時：文字透過 CSS 置中
+                    // 沒號碼時：提示訊息會透過 CSS 自動垂直置中
                     msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址參數)";
                 }
             } catch (e) {
