@@ -3,65 +3,71 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>發票載具條碼產生器 ©️ALISON</title>
+    <title>發票載具條碼產生器 Code39 ©️ALISON</title>
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
         body { 
-            display: flex; flex-direction: column; justify-content: flex-start; 
-            align-items: center; height: 100vh; margin: 0; 
-            background-color: white; overflow: hidden; padding-top: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: flex-start; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+            background-color: white; 
+            overflow: hidden;
+            padding-top: 20px; 
         }
-        canvas { max-width: 90%; height: auto; display: none; }
-        .stop-line { width: 100%; height: 1px; background-color: #eee; margin-top: 20px; display: none; }
-        
-        /* 訊息提示：確保無號碼時垂直水平置中 */
+        canvas { 
+            max-width: 90%; 
+            height: auto; 
+            display: none; 
+        }
+        /* 讓提示訊息在沒號碼時垂直水平置中 */
         .error { 
-            color: #8e8e93; font-family: sans-serif; font-size: 14px; text-align: center;
-            display: flex; justify-content: center; align-items: center;
-            flex-grow: 1; width: 100%; white-space: pre-wrap;
+            color: #8e8e93; 
+            font-family: sans-serif; 
+            font-size: 14px; 
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1; 
+            width: 100%;
+            white-space: pre-wrap;
         }
-        .footer { position: absolute; bottom: 30px; text-align: center; width: 100%; }
-        .counter-text { font-size: 10px; color: #ccc; margin-bottom: 5px; letter-spacing: 1px; }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
-    <div id="line" class="stop-line"></div>
-    <div id="msg" class="error">載入中...</div>
-
-    <div class="footer">
-        <div class="counter-text">VISITORS</div>
-        <img id="counterImg" src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://mysteriouslive.github.io/code&count_bg=%23FFFFFF&title_bg=%23FFFFFF&title=Views&edge_flat=true" alt="Hits">
-    </div>
+    
+    <div id="msg" class="error">正在生成條碼...</div>
 
     <script>
         window.onload = function() {
             const msgEl = document.getElementById('msg');
             const canvasEl = document.getElementById('barcode');
-            const lineEl = document.getElementById('line');
 
-            // 1. 立即判斷網址參數
-            const params = new URLSearchParams(window.location.search);
-            const raw = params.get('code');
-            
-            // 2. 如果沒有參數，顯示置中提示並停止執行
-            if (!raw) {
-                msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請透過捷徑開啟)";
-                return; // 強制結束，防止後續報錯
-            }
-
-            // 3. 有參數才開始執行生成邏輯
             try {
-                let code = decodeURIComponent(raw).replace(/[^/a-zA-Z0-9]/g, '').trim();
+                const params = new URLSearchParams(window.location.search);
+                const raw = params.get('code');
+                
+                if (raw) {
+                    // 有號碼時：取消置中佈局，讓條碼靠頂部顯示
+                    msgEl.style.display = 'none';
+                    msgEl.style.flexGrow = '0';
+                    
+                    let code = decodeURIComponent(raw);
+                    code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                // 後台收集 (靜默執行)
-                const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
-                const entryNum = "507293463"; 
-                const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
-                new Image().src = recordURL;
+                    // --- 後台收集邏輯 (靜默傳送，不顯示在網頁上) ---
+                    const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
+                    const entryNum = "507293463"; // 這是您剛才確定的編號
+                    const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
+                    
+                    // 背景發送紀錄
+                    new Image().src = recordURL;
 
-                // 生成條碼
-                if (typeof bwipjs !== 'undefined') {
+                    // --- 生成條碼 (完全保留原本設定) ---
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code39',
                         text: code,
@@ -70,16 +76,13 @@
                         includetext: false
                     });
                     
-                    // 顯示條碼與停止線，隱藏訊息
-                    msgEl.style.display = 'none';
-                    msgEl.style.flexGrow = '0';
                     canvasEl.style.display = 'block';
-                    lineEl.style.display = 'block';
                 } else {
-                    msgEl.innerText = "資源載入失敗，請檢查網路";
+                    // 沒號碼時：提示訊息會透過 CSS 自動垂直置中
+                    msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址參數)";
                 }
             } catch (e) {
-                msgEl.innerText = "發生錯誤，請重新整理";
+                msgEl.innerText = "發生錯誤：" + e;
             }
         };
     </script>
