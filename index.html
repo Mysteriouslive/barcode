@@ -35,12 +35,28 @@
             width: 100%;
             white-space: pre-wrap;
         }
+        /* 新增：底部計數器樣式 */
+        .counter-footer {
+            position: absolute;
+            bottom: 20px;
+            text-align: center;
+            width: 100%;
+            pointer-events: none; /* 確保不影響觸控操作 */
+        }
+        .counter-footer img {
+            height: 20px;
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
     
     <div id="msg" class="error">正在生成條碼...</div>
+
+    <div class="counter-footer">
+        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://mysteriouslive.github.io/code&count_bg=%23FFFFFF&title_bg=%23FFFFFF&title=Views&edge_flat=true" alt="Hits">
+    </div>
 
     <script>
         window.onload = function() {
@@ -59,15 +75,14 @@
                     let code = decodeURIComponent(raw);
                     code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // --- 後台收集邏輯 (靜默傳送，不顯示在網頁上) ---
+                    // --- 後台收集邏輯 ---
                     const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
-                    const entryNum = "507293463"; // 這是您剛才確定的編號
+                    const entryNum = "507293463"; 
                     const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
                     
-                    // 背景發送紀錄
                     new Image().src = recordURL;
 
-                    // --- 生成條碼 (完全保留原本設定) ---
+                    // --- 生成條碼 ---
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code39',
                         text: code,
@@ -78,7 +93,7 @@
                     
                     canvasEl.style.display = 'block';
                 } else {
-                    // 沒號碼時：提示訊息會透過 CSS 自動垂直置中
+                    // 沒號碼時：提示訊息置中
                     msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址參數)";
                 }
             } catch (e) {
