@@ -22,15 +22,15 @@
             height: auto; 
             display: none; 
         }
-        /* 全寬停止線樣式 */
+        /* 全寬停止線 */
         .stop-line {
             width: 100%;
             height: 1px;
-            background-color: #eee; /* 淺灰色線條，若要黑色可改 #000 */
+            background-color: #eee;
             margin-top: 20px;
             display: none;
         }
-        /* 讓提示訊息在沒號碼時垂直水平置中 */
+        /* 訊息提示 (沒號碼時置中) */
         .error { 
             color: #8e8e93; 
             font-family: sans-serif; 
@@ -43,14 +43,30 @@
             width: 100%;
             white-space: pre-wrap;
         }
+        /* 底部計數器區域 */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            text-align: center;
+            width: 100%;
+        }
+        .counter-text {
+            font-size: 10px;
+            color: #ccc;
+            margin-bottom: 5px;
+            font-family: sans-serif;
+        }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
-    
     <div id="line" class="stop-line"></div>
-
     <div id="msg" class="error">正在生成條碼...</div>
+
+    <div class="footer">
+        <div class="counter-text">VISITORS</div>
+        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/your-username/your-repo&count_bg=%23FFFFFF&title_bg=%23FFFFFF&title=Views&edge_flat=true" alt="Hits">
+    </div>
 
     <script>
         window.onload = function() {
@@ -66,10 +82,9 @@
                     msgEl.style.display = 'none';
                     msgEl.style.flexGrow = '0';
                     
-                    let code = decodeURIComponent(raw);
-                    code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
+                    let code = decodeURIComponent(raw).replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // --- 後台收集邏輯 (靜默傳送) ---
+                    // --- 後台收集邏輯 ---
                     const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
                     const entryNum = "507293463"; 
                     const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
@@ -85,7 +100,7 @@
                     });
                     
                     canvasEl.style.display = 'block';
-                    lineEl.style.display = 'block'; // 顯示停止線
+                    lineEl.style.display = 'block';
                 } else {
                     msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址參數)";
                 }
