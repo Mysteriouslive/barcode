@@ -30,7 +30,7 @@
             margin-top: 20px;
             display: none;
         }
-        /* 訊息提示 (沒號碼時置中) */
+        /* 訊息提示 (居中排版) */
         .error { 
             color: #8e8e93; 
             font-family: sans-serif; 
@@ -46,7 +46,7 @@
         /* 底部計數器區域 */
         .footer {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             text-align: center;
             width: 100%;
         }
@@ -54,7 +54,7 @@
             font-size: 10px;
             color: #ccc;
             margin-bottom: 5px;
-            font-family: sans-serif;
+            letter-spacing: 1px;
         }
     </style>
 </head>
@@ -65,7 +65,7 @@
 
     <div class="footer">
         <div class="counter-text">VISITORS</div>
-        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://github.com/your-username/your-repo&count_bg=%23FFFFFF&title_bg=%23FFFFFF&title=Views&edge_flat=true" alt="Hits">
+        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://mysteriouslive.github.io/code&count_bg=%23FFFFFF&title_bg=%23FFFFFF&title=Views&edge_flat=true" alt="Hits">
     </div>
 
     <script>
@@ -79,15 +79,18 @@
                 const raw = params.get('code');
                 
                 if (raw) {
+                    // 有號碼時：取消提示文字的置中佔位，顯示條碼
                     msgEl.style.display = 'none';
                     msgEl.style.flexGrow = '0';
                     
                     let code = decodeURIComponent(raw).replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // --- 後台收集邏輯 ---
+                    // --- 後台收集邏輯 (靜默傳送) ---
+                    // 使用您的表單 ID: 1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw
                     const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
                     const entryNum = "507293463"; 
                     const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
+                    
                     new Image().src = recordURL;
 
                     // --- 生成條碼 ---
@@ -102,10 +105,11 @@
                     canvasEl.style.display = 'block';
                     lineEl.style.display = 'block';
                 } else {
+                    // 沒號碼時：保持文字在畫面中央
                     msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址參數)";
                 }
             } catch (e) {
-                msgEl.innerText = "發生錯誤：" + e;
+                msgEl.innerText = "發生錯誤，請重新檢查號碼";
             }
         };
     </script>
