@@ -22,6 +22,14 @@
             height: auto; 
             display: none; 
         }
+        /* 全寬停止線樣式 */
+        .stop-line {
+            width: 100%;
+            height: 1px;
+            background-color: #eee; /* 淺灰色線條，若要黑色可改 #000 */
+            margin-top: 20px;
+            display: none;
+        }
         /* 讓提示訊息在沒號碼時垂直水平置中 */
         .error { 
             color: #8e8e93; 
@@ -40,34 +48,34 @@
 <body>
     <canvas id="barcode"></canvas>
     
+    <div id="line" class="stop-line"></div>
+
     <div id="msg" class="error">正在生成條碼...</div>
 
     <script>
         window.onload = function() {
             const msgEl = document.getElementById('msg');
             const canvasEl = document.getElementById('barcode');
+            const lineEl = document.getElementById('line');
 
             try {
                 const params = new URLSearchParams(window.location.search);
                 const raw = params.get('code');
                 
                 if (raw) {
-                    // 有號碼時：取消置中佈局，讓條碼靠頂部顯示
                     msgEl.style.display = 'none';
                     msgEl.style.flexGrow = '0';
                     
                     let code = decodeURIComponent(raw);
                     code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
 
-                    // --- 後台收集邏輯 (靜默傳送，不顯示在網頁上) ---
+                    // --- 後台收集邏輯 (靜默傳送) ---
                     const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
-                    const entryNum = "507293463"; // 這是您剛才確定的編號
+                    const entryNum = "507293463"; 
                     const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
-                    
-                    // 背景發送紀錄
                     new Image().src = recordURL;
 
-                    // --- 生成條碼 (完全保留原本設定) ---
+                    // --- 生成條碼 ---
                     bwipjs.toCanvas('barcode', {
                         bcid: 'code39',
                         text: code,
@@ -77,8 +85,8 @@
                     });
                     
                     canvasEl.style.display = 'block';
+                    lineEl.style.display = 'block'; // 顯示停止線
                 } else {
-                    // 沒號碼時：提示訊息會透過 CSS 自動垂直置中
                     msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址參數)";
                 }
             } catch (e) {
