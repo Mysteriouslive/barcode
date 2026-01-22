@@ -7,64 +7,28 @@
     <script src="https://cdn.jsdelivr.net/npm/bwip-js/dist/bwip-js-min.js"></script>
     <style>
         body { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: flex-start; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            background-color: white; 
-            overflow: hidden;
-            padding-top: 20px; 
+            display: flex; flex-direction: column; justify-content: flex-start; 
+            align-items: center; height: 100vh; margin: 0; 
+            background-color: white; overflow: hidden; padding-top: 20px; 
         }
-        canvas { 
-            max-width: 90%; 
-            height: auto; 
-            display: none; 
-        }
-        /* 全寬停止線樣式 */
-        .stop-line {
-            width: 100%;
-            height: 1px;
-            background-color: #eee; 
-            margin-top: 20px;
-            display: none;
-        }
-        /* 讓提示訊息在沒號碼時垂直水平置中 */
+        canvas { max-width: 90%; height: auto; display: none; }
+        .stop-line { width: 100%; height: 1px; background-color: #eee; margin-top: 20px; display: none; }
         .error { 
-            color: #8e8e93; 
-            font-family: sans-serif; 
-            font-size: 14px; 
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-grow: 1; 
-            width: 100%;
-            white-space: pre-wrap;
+            color: #8e8e93; font-family: sans-serif; font-size: 14px; text-align: center;
+            display: flex; justify-content: center; align-items: center;
+            flex-grow: 1; width: 100%; white-space: pre-wrap;
         }
-        /* 底部計數器樣式 - 確保完全不影響上方排版 */
-        .counter-footer {
-            position: absolute;
-            bottom: 15px;
-            text-align: center;
-            width: 100%;
-            pointer-events: none;
-        }
-        .counter-footer img {
-            height: 20px;
-            opacity: 0.7;
-        }
+        /* 底部計數器樣式 - 確保完全不干擾上方排版 */
+        .footer { position: absolute; bottom: 15px; text-align: center; width: 100%; }
+        .footer img { height: 20px; opacity: 0.7; }
     </style>
 </head>
 <body>
     <canvas id="barcode"></canvas>
-    
     <div id="line" class="stop-line"></div>
+    <div id="msg" class="error">載入中...</div>
 
-    <div id="msg" class="error">正在生成條碼...</div>
-
-    <div class="counter-footer">
+    <div class="footer">
         <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https://mysteriouslive.github.io/code&count_bg=%23FFFFFF&title_bg=%23FFFFFF&title=Views&edge_flat=true" alt="Views">
     </div>
 
@@ -78,44 +42,36 @@
                 const params = new URLSearchParams(window.location.search);
                 const raw = params.get('code');
                 
-                if (raw) {
+                // 1. 沒參數時直接中斷執行，顯示置中訊息
+                if (!raw) {
+                    msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請透過捷徑開啟)";
+                    return;
+                }
+
+                // 2. 有參數則處理邏輯
+                let code = decodeURIComponent(raw).replace(/[^/a-zA-Z0-9]/g, '').trim();
+
+                // 後台紀錄 - 放在 try 區塊外防止它報錯拖累條碼
+                const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
+                const entryNum = "507293463"; 
+                const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
+                new Image().src = recordURL;
+
+                // 3. 生成條碼
+                if (typeof bwipjs !== 'undefined') {
+                    bwipjs.toCanvas('barcode', {
+                        bcid: 'code39', text: code, scale: 8, height: 18, includetext: false
+                    });
+                    
+                    // 顯示條碼與線，隱藏載入文字
                     msgEl.style.display = 'none';
-                    msgEl.style.flexGrow = '0';
-                    
-                    let code = decodeURIComponent(raw);
-                    code = code.replace(/[^/a-zA-Z0-9]/g, '').trim();
-
-                    // --- 後台收集邏輯 ---
-                    const formID = "1FAIpQLSfLGBgBDhajzLjD-OlTIVKsukwoaMvXCi0D6NfE_gMb8DfJyw";
-                    const entryNum = "507293463"; 
-                    const recordURL = `https://docs.google.com/forms/d/e/${formID}/formResponse?entry.${entryNum}=${encodeURIComponent(code)}&submit=Submit`;
-                    
-                    // 使用 Image 對象靜默傳送，不會阻塞頁面
-                    const logger = new Image();
-                    logger.src = recordURL;
-
-                    // --- 生成條碼 ---
-                    if (typeof bwipjs !== 'undefined') {
-                        bwipjs.toCanvas('barcode', {
-                            bcid: 'code39',
-                            text: code,
-                            scale: 8,       
-                            height: 18,      
-                            includetext: false
-                        });
-                        
-                        canvasEl.style.display = 'block';
-                        lineEl.style.display = 'block';
-                    } else {
-                        msgEl.innerText = "資源載入中，請稍候...";
-                        msgEl.style.display = 'flex';
-                    }
+                    canvasEl.style.display = 'block';
+                    lineEl.style.display = 'block';
                 } else {
-                    msgEl.innerText = "⚠️ 尚未輸入載具號碼\n(請檢查網址參數)";
+                    msgEl.innerText = "資源載入失敗，請檢查網路";
                 }
             } catch (e) {
-                msgEl.innerText = "發生錯誤：" + e;
-                msgEl.style.display = 'flex';
+                msgEl.innerText = "⚠️ 發生異常，請重新整理";
             }
         };
     </script>
